@@ -1,0 +1,42 @@
+<html>
+<head>
+  <title>EZ-Connect</title>
+</head>
+
+<body>
+  <input type="text" id="pattern">
+</body>
+</html>
+
+<script>
+
+function sendAjaxRequest(responseHandler, requestData)
+{
+  // Create an XML HTTP object for sending the request
+  var httpReqObj = new XMLHttpRequest();
+
+  // Set up the response handler
+  httpReqObj.onreadystatechange =
+    function(e) { return responseHandler.call(e, httpReqObj); };
+  
+  // Open and send the request
+  httpReqObj.open("POST", "api/ezconnect.php", true);
+  httpReqObj.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  httpReqObj.send(JSON.stringify(requestData));  
+
+  return;
+}
+
+function patternINPUT_onkeyup()
+{
+  var pattern   = document.getElementById("pattern").value;
+  var reqData   = { "cmd"        : "search",
+                    "pattern"    : pattern,
+                    "return_max" : 6 };
+  
+  sendAjaxRequest(patternMatchResults, reqData);
+  
+  return;
+}
+
+
