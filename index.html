@@ -1,10 +1,37 @@
 <html>
 <head>
   <title>EZ-Connect</title>
+  <link rel="stylesheet" type="text/css" href="ezconnect.css">
 </head>
 
 <body>
-  <input type="text" id="pattern">
+  <input type="text" id="searchbar" onkeyup="result_updater()">
+  <div id="content"></div>
+
+  <section>
+  <div class="tbl-header">
+  <table cellpadding="0" cellspacing="0" border="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Extension</th>
+        <th>Cell</th>
+      </tr>
+    </thead>
+  </table>
+  </div>
+  <div class="tbl-content">
+  <table cellpadding="0" cellspacing="0" border="0" id="table_content">
+    <tbody>
+      <tr>
+        <td>John Doe</td>
+        <td>5555</td>
+        <td>+1 (555) 555-5555</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  </section>
 </body>
 </html>
 
@@ -27,16 +54,61 @@ function sendAjaxRequest(responseHandler, requestData)
   return;
 }
 
-function patternINPUT_onkeyup()
+function result_updater()
 {
-  var pattern   = document.getElementById("pattern").value;
+  var pattern   = document.getElementById("searchbar").value;
   var reqData   = { "cmd"        : "search",
                     "pattern"    : pattern,
                     "return_max" : 6 };
   
-  sendAjaxRequest(patternMatchResults, reqData);
+  sendAjaxRequest(result_processor, reqData);
   
   return;
 }
 
+function result_processor(httpObj)
+{
+  // Ignore the response unless it is the final (readyState 4 means "done")
+  // response for the request.
+  if (httpObj.readyState != 4) return;
+
+//   var content = document.getElementById("content"); 
+  
+  // Ignore the response (apart from the clearing of the previous results above)
+  // if the request failed for any reason (status 200 means success).
+  if (httpObj.status != 200) return;
+  
+  // Parse the returned JSON string
+  var responseData = JSON.parse(httpObj.responseText);
+  
+  // Add the new completion options to the list
+  var optionsData = responseData["options"];
+ 
+  // Make it visible (Kind of working ...)
+  // var table_head = document.getElementById("thead");
+  // var table_rows = document.getElementById("tablerows");
+  // table_rows.style.visibility = 'visible';
+
+  var content = document.getElementById("table_content");
+  var new_tbody = document.createElement('tbody');
+
+  for (var i = 0; i < optionsData.length; i++)
+  {
+    // content.innerHTML = optionsData[i]["name"];
+    var row = new_tbody.insertRow(0);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+
+    cell1.innerHTML = optionsData[i]["name"];
+    cell2.innerHTML = optionsData[i]["ext"];
+    cell3.innerHTML = optionsData[i]["cell"]
+  }
+ 
+  content.parentNode.replaceChild(new_tbody, content);
+ 
+  return;
+}
+
+</script>
 
